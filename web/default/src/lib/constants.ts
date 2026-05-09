@@ -3,8 +3,8 @@
  */
 
 // System Configuration Defaults
-export const DEFAULT_SYSTEM_NAME = 'New API'
-export const DEFAULT_LOGO = '/logo.png'
+export const DEFAULT_SYSTEM_NAME = 'AiLingTu API'
+export const DEFAULT_LOGO = '/favicon.png'
 
 // LocalStorage Keys
 export const STORAGE_KEYS = {
