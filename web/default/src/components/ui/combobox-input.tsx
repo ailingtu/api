@@ -50,19 +50,33 @@ export function ComboboxInput({
   const { t } = useTranslation()
   const [open, setOpen] = React.useState(false)
   const [highlightedIndex, setHighlightedIndex] = React.useState(-1)
+  const [searchText, setSearchText] = React.useState('')
   const containerRef = React.useRef<HTMLDivElement>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const listRef = React.useRef<HTMLUListElement>(null)
 
+  // Derive display label from selected value
+  const selectedLabel = React.useMemo(() => {
+    if (!value) return ''
+    const matched = options.find((o) => o.value === value)
+    return matched ? matched.label : value
+  }, [value, options])
+
+  // When dropdown closes, reset search text
+  const handleClose = React.useCallback(() => {
+    setOpen(false)
+    setSearchText('')
+  }, [])
+
   const filteredOptions = React.useMemo(() => {
-    if (!value.trim()) return options
-    const search = value.toLowerCase().trim()
+    if (!searchText.trim()) return options
+    const search = searchText.toLowerCase().trim()
     return options.filter(
       (option) =>
         option.label.toLowerCase().includes(search) ||
         option.value.toLowerCase().includes(search)
     )
-  }, [options, value])
+  }, [options, searchText])
 
   // Reset highlight when filtered options change
   React.useEffect(() => {
@@ -78,17 +92,17 @@ export function ComboboxInput({
         containerRef.current &&
         !containerRef.current.contains(e.target as Node)
       ) {
-        setOpen(false)
+        handleClose()
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open])
+  }, [open, handleClose])
 
   const handleSelect = (selectedValue: string) => {
     onValueChange(selectedValue)
-    setOpen(false)
+    handleClose()
     inputRef.current?.focus()
   }
 
@@ -118,13 +132,12 @@ export function ComboboxInput({
         if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
           handleSelect(filteredOptions[highlightedIndex].value)
         } else {
-          // No highlighted option, just close the dropdown and keep current value
-          setOpen(false)
+          handleClose()
         }
         break
       case 'Escape':
         e.preventDefault()
-        setOpen(false)
+        handleClose()
         break
     }
   }
@@ -136,7 +149,10 @@ export function ComboboxInput({
     item?.scrollIntoView({ block: 'nearest' })
   }, [highlightedIndex])
 
-  const showDropdown = open && (filteredOptions.length > 0 || value.trim())
+  // Input displays search text when open, selected label when closed
+  const inputDisplayValue = open ? searchText : selectedLabel
+
+  const showDropdown = open && (filteredOptions.length > 0 || searchText.trim())
 
   return (
     <div ref={containerRef} className='relative'>
@@ -149,13 +165,16 @@ export function ComboboxInput({
         aria-haspopup='listbox'
         aria-autocomplete='list'
         autoComplete='off'
-        placeholder={placeholder}
-        value={value}
+        placeholder={open ? t('Search...') : placeholder}
+        value={inputDisplayValue}
         onChange={(e) => {
-          onValueChange(e.target.value)
+          setSearchText(e.target.value)
           if (!open) setOpen(true)
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setSearchText('')
+          setOpen(true)
+        }}
         onKeyDown={handleKeyDown}
         className={cn('pr-9', className)}
       />
@@ -201,9 +220,11 @@ export function ComboboxInput({
           ) : (
             <div className='px-2 py-6 text-center text-sm'>
               {emptyText}
-              {value.trim() && (
+              {searchText.trim() && (
                 <div className='text-muted-foreground mt-1 text-xs'>
-                  {t('Press Enter to use "{{value}}"', { value: value.trim() })}
+                  {t('Press Enter to use "{{value}}"', {
+                    value: searchText.trim(),
+                  })}
                 </div>
               )}
             </div>

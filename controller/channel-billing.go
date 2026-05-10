@@ -287,6 +287,7 @@ func updateChannelDeepSeekBalance(channel *model.Channel) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	balance = balance / operation_setting.USDExchangeRate
 	channel.UpdateBalance(balance)
 	return balance, nil
 }
