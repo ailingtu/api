@@ -1,6 +1,10 @@
 .github
 .git
 *.md
+# 下面这两行表示：不要忽略这两个特定的 md 文件
+!LICENSE
+!NOTICE
+!THIRD-PARTY-LICENSES.md
 .vscode
 .gitignore
 Makefile
