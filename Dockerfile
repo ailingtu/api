@@ -1,4 +1,4 @@
-FROM crpi-bjaohctuykinmn8x-vpc.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/bun:1 AS builder
+FROM crpi-bjaohctuykinmn8x.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/bun:1 AS builder
 
 WORKDIR /build
 COPY web/default/package.json .
@@ -8,7 +8,7 @@ COPY ./web/default .
 COPY ./VERSION .
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
 
-FROM crpi-bjaohctuykinmn8x-vpc.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/bun:1 AS builder-classic
+FROM crpi-bjaohctuykinmn8x.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/bun:1 AS builder-classic
 
 WORKDIR /build
 COPY web/classic/package.json .
@@ -18,7 +18,7 @@ COPY ./web/classic .
 COPY ./VERSION .
 RUN VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
 
-FROM crpi-bjaohctuykinmn8x-vpc.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/golang:1.26.1-alpine AS builder2
+FROM crpi-bjaohctuykinmn8x.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/golang:1.26.1-alpine AS builder2
 ENV GO111MODULE=on CGO_ENABLED=0
 
 ARG TARGETOS
@@ -36,7 +36,7 @@ COPY --from=builder /build/dist ./web/default/dist
 COPY --from=builder-classic /build/dist ./web/classic/dist
 RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o new-api
 
-FROM crpi-bjaohctuykinmn8x-vpc.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/debian:bookworm-slim
+FROM crpi-bjaohctuykinmn8x.eu-west-1.personal.cr.aliyuncs.com/ailingtu-base/debian:bookworm-slim
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates tzdata libasan8 wget \
