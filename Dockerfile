@@ -27,7 +27,7 @@ ENV GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64}
 ENV GOEXPERIMENT=greenteagc
 
 WORKDIR /build
-GOPROXY=https://mirrors.aliyun.com/goproxy/
+ENV GOPROXY=https://mirrors.aliyun.com/goproxy/
 
 ADD go.mod go.sum ./
 RUN go mod download
