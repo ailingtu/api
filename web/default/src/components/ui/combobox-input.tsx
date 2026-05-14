@@ -36,6 +36,7 @@ interface ComboboxInputProps {
   emptyText?: string
   className?: string
   id?: string
+  allowCustomValue?: boolean
 }
 
 export function ComboboxInput({
@@ -46,37 +47,30 @@ export function ComboboxInput({
   emptyText = 'No option found.',
   className,
   id,
+  allowCustomValue = false,
 }: ComboboxInputProps) {
   const { t } = useTranslation()
   const [open, setOpen] = React.useState(false)
+  const [searchValue, setSearchValue] = React.useState('')
   const [highlightedIndex, setHighlightedIndex] = React.useState(-1)
-  const [searchText, setSearchText] = React.useState('')
   const containerRef = React.useRef<HTMLDivElement>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const listRef = React.useRef<HTMLUListElement>(null)
-
-  // Derive display label from selected value
-  const selectedLabel = React.useMemo(() => {
-    if (!value) return ''
-    const matched = options.find((o) => o.value === value)
-    return matched ? matched.label : value
-  }, [value, options])
-
-  // When dropdown closes, reset search text
-  const handleClose = React.useCallback(() => {
-    setOpen(false)
-    setSearchText('')
-  }, [])
+  const selectedOption = React.useMemo(
+    () => options.find((option) => option.value === value),
+    [options, value]
+  )
+  const displayValue = open ? searchValue : (selectedOption?.label ?? value)
 
   const filteredOptions = React.useMemo(() => {
-    if (!searchText.trim()) return options
-    const search = searchText.toLowerCase().trim()
+    if (!searchValue.trim()) return options
+    const search = searchValue.toLowerCase().trim()
     return options.filter(
       (option) =>
         option.label.toLowerCase().includes(search) ||
         option.value.toLowerCase().includes(search)
     )
-  }, [options, searchText])
+  }, [options, searchValue])
 
   // Reset highlight when filtered options change
   React.useEffect(() => {
@@ -92,17 +86,19 @@ export function ComboboxInput({
         containerRef.current &&
         !containerRef.current.contains(e.target as Node)
       ) {
-        handleClose()
+        setOpen(false)
+        setSearchValue('')
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open, handleClose])
+  }, [open])
 
   const handleSelect = (selectedValue: string) => {
     onValueChange(selectedValue)
-    handleClose()
+    setOpen(false)
+    setSearchValue('')
     inputRef.current?.focus()
   }
 
@@ -131,13 +127,18 @@ export function ComboboxInput({
         e.preventDefault()
         if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
           handleSelect(filteredOptions[highlightedIndex].value)
+        } else if (allowCustomValue && searchValue.trim()) {
+          handleSelect(searchValue.trim())
         } else {
-          handleClose()
+          // No highlighted option, just close the dropdown and keep current value
+          setOpen(false)
+          setSearchValue('')
         }
         break
       case 'Escape':
         e.preventDefault()
-        handleClose()
+        setOpen(false)
+        setSearchValue('')
         break
     }
   }
@@ -149,10 +150,9 @@ export function ComboboxInput({
     item?.scrollIntoView({ block: 'nearest' })
   }, [highlightedIndex])
 
-  // Input displays search text when open, selected label when closed
-  const inputDisplayValue = open ? searchText : selectedLabel
-
-  const showDropdown = open && (filteredOptions.length > 0 || searchText.trim())
+  const showDropdown =
+    open &&
+    (filteredOptions.length > 0 || (allowCustomValue && searchValue.trim()))
 
   return (
     <div ref={containerRef} className='relative'>
@@ -165,14 +165,18 @@ export function ComboboxInput({
         aria-haspopup='listbox'
         aria-autocomplete='list'
         autoComplete='off'
-        placeholder={open ? t('Search...') : placeholder}
-        value={inputDisplayValue}
+        placeholder={placeholder}
+        value={displayValue}
         onChange={(e) => {
-          setSearchText(e.target.value)
+          const nextValue = e.target.value
+          setSearchValue(nextValue)
+          if (allowCustomValue) {
+            onValueChange(nextValue)
+          }
           if (!open) setOpen(true)
         }}
         onFocus={() => {
-          setSearchText('')
+          setSearchValue(allowCustomValue && !selectedOption ? value : '')
           setOpen(true)
         }}
         onKeyDown={handleKeyDown}
@@ -219,11 +223,11 @@ export function ComboboxInput({
             </ul>
           ) : (
             <div className='px-2 py-6 text-center text-sm'>
-              {emptyText}
-              {searchText.trim() && (
+              {t(emptyText)}
+              {allowCustomValue && searchValue.trim() && (
                 <div className='text-muted-foreground mt-1 text-xs'>
                   {t('Press Enter to use "{{value}}"', {
-                    value: searchText.trim(),
+                    value: searchValue.trim(),
                   })}
                 </div>
               )}
