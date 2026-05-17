@@ -3,7 +3,7 @@ FROM docker.m.daocloud.io/oven/bun:1@sha256:0733e50325078969732ebe3b15ce4c4be508
 WORKDIR /build
 COPY web/default/package.json .
 COPY web/default/bun.lock .
-RUN bun install
+RUN bun install --registry=https://registry.npmmirror.com
 COPY ./web/default .
 COPY ./VERSION .
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
@@ -13,7 +13,7 @@ FROM docker.m.daocloud.io/oven/bun:1@sha256:0733e50325078969732ebe3b15ce4c4be508
 WORKDIR /build
 COPY web/classic/package.json .
 COPY web/classic/bun.lock .
-RUN bun install
+RUN bun install --registry=https://registry.npmmirror.com
 COPY ./web/classic .
 COPY ./VERSION .
 RUN VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
@@ -39,7 +39,8 @@ RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$
 
 FROM docker.m.daocloud.io/debian:bookworm-slim@sha256:f06537653ac770703bc45b4b113475bd402f451e85223f0f2837acbf89ab020a
 
-RUN apt-get update \
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates tzdata libasan8 wget \
     && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
