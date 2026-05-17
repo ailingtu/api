@@ -70,7 +70,7 @@ const AUDIO_NAME_PATTERNS = [
   /-realtime/i,
 ]
 
-const VIDEO_NAME_PATTERNS = [/video/i, /sora/i, /veo/i, /kling/i, /pika/i]
+const VIDEO_NAME_PATTERNS = [/video/i, /sora/i, /seedance/i, /veo/i, /kling/i, /pika/i]
 
 const CODE_NAME_PATTERNS = [/code/i, /-coder/i]
 
