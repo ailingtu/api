@@ -1960,6 +1960,7 @@
     "How much to charge for each US dollar of balance (Epay)": "每美元余额（Epay）的收费金额",
     "How this model name should match requests": "此模型名称应如何匹配请求",
     "How to deliver the resulting image": "图像结果的返回方式",
+    "Reference image URL for image-to-image generation": "参考图片 URL，用于图生图",
     "How to get an io.net API Key": "如何获取 io.net API 密钥",
     "How to reset my quota?": "如何重置我的配额？",
     "How to select keys: random or sequential polling": "密钥选择方式：随机或顺序轮询",

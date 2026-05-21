@@ -16,13 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import type { PricingModel } from '../types'
-import {
-  hashStringToSeed,
-  randomInRange,
-  randomIntInRange,
-  seededRandom,
-} from './seed'
+import type { PricingModel } from '../types';
+import { hashStringToSeed, randomInRange, randomIntInRange, seededRandom } from './seed';
+
+
+
+
+
 
 // ----------------------------------------------------------------------------
 // Mock model statistics
@@ -731,6 +731,11 @@ const IMAGE_PARAMS: SupportedParameter[] = [
     enumValues: ['url', 'b64_json'],
     defaultValue: 'url',
     descriptionKey: 'How to deliver the resulting image',
+  },
+  {
+    name: 'image',
+    type: 'string',
+    descriptionKey: 'Reference image URL for image-to-image generation',
   },
 ]
 
